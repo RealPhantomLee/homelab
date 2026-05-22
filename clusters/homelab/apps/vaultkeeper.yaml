@@ -4,6 +4,7 @@ metadata:
   name: vaultkeeper
   namespace: argocd
 spec:
+  project: default
   # Repository configuration
   source:
     repoURL: https://github.com/realphantomlee/homelab

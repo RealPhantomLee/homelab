@@ -4,6 +4,7 @@ metadata:
   name: local-ai
   namespace: argocd
 spec:
+  project: default
   # Repository configuration
   source:
     repoURL: https://github.com/realphantomlee/homelab
