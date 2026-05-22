@@ -6,7 +6,7 @@ metadata:
   labels:
     app: vaultkeeper-server
 spec:
-  replicas: 1
+  replicas: 0  # DISABLED: Image architecture mismatch on arm64 node (aipi). See audit cycle 1.
   selector:
     matchLabels:
       app: vaultkeeper-server

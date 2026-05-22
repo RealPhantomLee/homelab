@@ -38,7 +38,8 @@ operatorConfig:
 # Operator Pod Configuration
 operatorDeploy:
   # Number of operator replicas
-  replicas: 1
+  # DISABLED: Auth tags 'tag:k8s-operator' not permitted in Tailscale admin console. See audit cycle 1.
+  replicas: 0
 
   # Resource requests and limits
   resources:
