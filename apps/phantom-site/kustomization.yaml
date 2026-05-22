@@ -8,6 +8,7 @@ namespace: phantom-site
 
 resources:
   - namespace.yaml
+  - serviceaccount.yaml
   - deployment.yaml
   - service.yaml
 
