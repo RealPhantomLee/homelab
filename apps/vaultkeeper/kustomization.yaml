@@ -16,7 +16,7 @@ commonLabels:
   app: vaultkeeper-server
   managed-by: argocd
 
-# TODO: Configure image tag replacement if using separate build/deploy workflows
-# images:
-#   - name: ghcr.io/realphantomlee/vaultkeeper-server
-#     newTag: v1.0.0
+# Pinned image — override here when promoting a new build
+images:
+  - name: ghcr.io/realphantomlee/vaultkeeper-server
+    newTag: v0.1.0

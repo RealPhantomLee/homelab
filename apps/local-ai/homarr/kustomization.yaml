@@ -15,7 +15,5 @@ commonLabels:
   app: homarr
   managed-by: argocd
 
-# TODO: Configure image tag replacement if using separate build/deploy workflows
-# images:
-#   - name: ghcr.io/realphantomlee/homarr
-#     newTag: v1.2.3
+# Image pinning deferred: homarr image not yet published (deployment disabled with replicas: 0).
+# When publishing a build, add an `images:` override below to pin the tag.

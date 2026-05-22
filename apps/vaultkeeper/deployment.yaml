@@ -23,8 +23,9 @@ spec:
         - name: vaultkeeper-server
           # Multi-arch image: linux/amd64 + linux/arm64
           # Built with: docker buildx build --platform linux/amd64,linux/arm64 --push ghcr.io/realphantomlee/vaultkeeper-server:latest
-          image: ghcr.io/realphantomlee/vaultkeeper-server:latest
-          imagePullPolicy: Always
+          # image: ghcr.io/realphantomlee/vaultkeeper-server:latest
+          image: ghcr.io/realphantomlee/vaultkeeper-server:v0.1.0
+          imagePullPolicy: IfNotPresent
 
           ports:
             - name: http

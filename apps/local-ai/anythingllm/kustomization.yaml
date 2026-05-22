@@ -15,7 +15,5 @@ commonLabels:
   app: anythingllm
   managed-by: argocd
 
-# TODO: Configure image tag replacement if using separate build/deploy workflows
-# images:
-#   - name: ghcr.io/realphantomlee/anythingllm
-#     newTag: v1.2.3
+# Image pinning deferred: anythingllm image not yet published (deployment disabled with replicas: 0).
+# When publishing a build, add an `images:` override below to pin the tag.

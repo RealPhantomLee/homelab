@@ -21,12 +21,13 @@ spec:
 
       containers:
         - name: phantom-site
-          # TODO: Build and push nginx image serving phantomcybersolutions.com static content
+          # Build and push nginx image serving phantomcybersolutions.com static content
           # Dockerfile: Dockerfile.phantom-nginx
           # Base: nginx:latest (supports linux/amd64 + linux/arm64)
           # COPY from /home/roger/phantomcybersolutions.com/* to /usr/share/nginx/html/
-          image: ghcr.io/realphantomlee/phantom-site:latest
-          imagePullPolicy: Always
+          # image: ghcr.io/realphantomlee/phantom-site:latest
+          image: ghcr.io/realphantomlee/phantom-site:v0.1.0
+          imagePullPolicy: IfNotPresent
 
           ports:
             - name: http
