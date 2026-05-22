@@ -20,11 +20,26 @@ spec:
       nodeSelector:
         kubernetes.io/hostname: blacknode
 
+      # Pod-level security context — anythingllm listens on 3001 (unprivileged), so drop root.
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+
       containers:
         - name: anythingllm
-          # TODO: update to match your deployed image tag
+          # Image pinning deferred until ghcr.io/realphantomlee/anythingllm is published.
           image: ghcr.io/realphantomlee/anythingllm:latest
           imagePullPolicy: Always
+
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+            capabilities:
+              drop: ["ALL"]
 
           ports:
             - name: http

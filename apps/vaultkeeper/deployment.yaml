@@ -19,6 +19,19 @@ spec:
       nodeSelector:
         kubernetes.io/hostname: aipi
 
+      serviceAccountName: vaultkeeper
+
+      # Pod-level security context — vaultkeeper-server listens on 3456 (unprivileged),
+      # so the whole pod can drop root. fsGroup ensures the mounted PVCs are writable
+      # by uid 1000.
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+
       containers:
         - name: vaultkeeper-server
           # Multi-arch image: linux/amd64 + linux/arm64
@@ -26,6 +39,15 @@ spec:
           # image: ghcr.io/realphantomlee/vaultkeeper-server:latest
           image: ghcr.io/realphantomlee/vaultkeeper-server:v0.1.0
           imagePullPolicy: IfNotPresent
+
+          # Container-level security context — drop all caps, block privilege escalation.
+          # readOnlyRootFilesystem is false because tokio/sqlite scratch space may write
+          # outside the mounted PVCs; tighten once the runtime FS profile is verified.
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+            capabilities:
+              drop: ["ALL"]
 
           ports:
             - name: http

@@ -19,31 +19,48 @@ spec:
       nodeSelector:
         kubernetes.io/hostname: cyberdeck
 
+      serviceAccountName: phantom-site
+
+      # Pod-level security context — drop root privileges across the pod.
+      # The container listens on 8080 (unprivileged) and the Service maps 80 -> 8080.
+      # Requires the phantom-site image to be built on nginxinc/nginx-unprivileged
+      # (or equivalent) so nginx workers can run as uid 1000.
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+
       containers:
         - name: phantom-site
           # Build and push nginx image serving phantomcybersolutions.com static content
           # Dockerfile: Dockerfile.phantom-nginx
-          # Base: nginx:latest (supports linux/amd64 + linux/arm64)
+          # Base: nginxinc/nginx-unprivileged (supports linux/amd64 + linux/arm64, listens on 8080 as uid 1000)
           # COPY from /home/roger/phantomcybersolutions.com/* to /usr/share/nginx/html/
           # image: ghcr.io/realphantomlee/phantom-site:latest
           image: ghcr.io/realphantomlee/phantom-site:v0.1.0
           imagePullPolicy: IfNotPresent
 
+          # Container-level security context — restrict syscalls and filesystem writes.
+          # readOnlyRootFilesystem stays false until nginx cache/run/tmp dirs are mounted as emptyDir.
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+            capabilities:
+              drop: ["ALL"]
+
           ports:
             - name: http
-              containerPort: 80
+              containerPort: 8080
               protocol: TCP
 
-          env:
-            # TODO: configure environment variables if needed
-            # - name: NGINX_HOST
-            #   value: "phantomcybersolutions.com"
-
-          # Health check for nginx
+          # Health check for nginx (probes target the unprivileged container port)
           livenessProbe:
             httpGet:
               path: /
-              port: 80
+              port: 8080
             initialDelaySeconds: 10
             periodSeconds: 10
             timeoutSeconds: 3
@@ -52,7 +69,7 @@ spec:
           readinessProbe:
             httpGet:
               path: /
-              port: 80
+              port: 8080
             initialDelaySeconds: 5
             periodSeconds: 5
             timeoutSeconds: 2
