@@ -1,0 +1,33 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: monitoring
+  namespace: argocd
+  # labels:
+  #   app: monitoring
+spec:
+  # Repository configuration
+  source:
+    repoURL: https://github.com/realphantomlee/homelab
+    targetRevision: main
+    path: apps/monitoring
+
+  # Deployment destination
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: monitoring
+
+  # Automated sync with self-healing
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+
+  # Enable cascading deletion
+  finalizers:
+    - resources-finalizer.argocd.io
+
+  # NOTE: This is a placeholder for monitoring stack (Prometheus, Grafana, etc.)
+  # Populate apps/monitoring/ with your monitoring stack Helm charts or manifests

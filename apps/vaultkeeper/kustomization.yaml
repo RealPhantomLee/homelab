@@ -1,0 +1,20 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# Directory-relative references (assumes this file is in apps/vaultkeeper/)
+namespace: vaultkeeper
+
+resources:
+  - namespace.yaml
+  - deployment.yaml
+  - pvc.yaml
+  - service.yaml
+
+commonLabels:
+  app: vaultkeeper-server
+  managed-by: argocd
+
+# TODO: Configure image tag replacement if using separate build/deploy workflows
+# images:
+#   - name: ghcr.io/realphantomlee/vaultkeeper-server
+#     newTag: v1.0.0

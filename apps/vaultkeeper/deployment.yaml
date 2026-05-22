@@ -1,0 +1,85 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vaultkeeper-server
+  namespace: vaultkeeper
+  labels:
+    app: vaultkeeper-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vaultkeeper-server
+  template:
+    metadata:
+      labels:
+        app: vaultkeeper-server
+    spec:
+      # Run on aipi (Pi 5 worker) where data + backup PVCs are local-path provisioned
+      nodeSelector:
+        kubernetes.io/hostname: aipi
+
+      containers:
+        - name: vaultkeeper-server
+          # Multi-arch image: linux/amd64 + linux/arm64
+          # Built with: docker buildx build --platform linux/amd64,linux/arm64 --push ghcr.io/realphantomlee/vaultkeeper-server:latest
+          image: ghcr.io/realphantomlee/vaultkeeper-server:latest
+          imagePullPolicy: Always
+
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+
+          env:
+            # TODO: configure VaultKeeper-specific env vars
+            # - name: LOG_LEVEL
+            #   value: "debug"
+            # - name: PORT
+            #   value: "8080"
+
+          # Mount storage volumes
+          volumeMounts:
+            # Primary data store (SQLite, configs, etc.)
+            - name: data
+              mountPath: /app/data
+
+            # Backup directory (snapshots, exports, etc.)
+            - name: backups
+              mountPath: /app/backups
+
+          # Liveness probe: VaultKeeper should expose /health endpoint
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 2
+
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "1"
+
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: vaultkeeper-data
+
+        - name: backups
+          persistentVolumeClaim:
+            claimName: vaultkeeper-backups

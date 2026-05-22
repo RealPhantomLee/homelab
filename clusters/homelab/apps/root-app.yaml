@@ -1,0 +1,28 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: root
+  namespace: argocd
+spec:
+  # Repository configuration
+  source:
+    repoURL: https://github.com/realphantomlee/homelab
+    targetRevision: main
+    path: clusters/homelab/apps
+
+  # Deployment destination
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+
+  # Automated sync with self-healing
+  syncPolicy:
+    automated:
+      prune: true      # Delete resources that are no longer defined in Git
+      selfHeal: true   # Auto-sync when cluster state drifts from Git
+    syncOptions:
+      - CreateNamespace=true
+
+  # Enable cascading deletion when this app is deleted
+  finalizers:
+    - resources-finalizer.argocd.io

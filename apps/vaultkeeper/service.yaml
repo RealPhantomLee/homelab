@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: vaultkeeper-server
+  namespace: vaultkeeper
+  labels:
+    app: vaultkeeper-server
+  annotations:
+    # Optional: expose on tailnet via Tailscale Operator
+    # Uncomment to enable secure tailnet access:
+    # tailscale.com/hostname: "vaultkeeper"
+spec:
+  type: ClusterIP
+  # Optional: switch to LoadBalancer + Tailscale annotations for external access
+  # type: LoadBalancer
+  # loadBalancerClass: tailscale
+
+  selector:
+    app: vaultkeeper-server
+
+  ports:
+    - port: 8080
+      targetPort: http
+      protocol: TCP
+      name: http

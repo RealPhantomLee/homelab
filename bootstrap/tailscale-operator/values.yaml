@@ -1,0 +1,122 @@
+# Tailscale Operator Helm Chart Values
+# Deploy with: helm repo add tailscale https://pkgs.tailscale.com/helmcharts
+#              helm repo update
+#              helm install tailscale-operator tailscale/tailscale-operator \
+#                --namespace tailscale --create-namespace \
+#                -f bootstrap/tailscale-operator/values.yaml
+
+---
+# OAuth credentials from Tailscale Admin Console
+# See: https://login.tailscale.com/admin/settings/oauth
+oauth:
+  # OAuth Client ID
+  # REQUIRED: Replace with your actual OAuth Client ID from Tailscale admin console
+  # See Settings > OAuth > Generate OAuth token
+  clientId: ""
+
+  # OAuth Client Secret (stored in a Kubernetes Secret)
+  # REQUIRED: Replace with your actual OAuth Client Secret
+  # IMPORTANT: This will be stored in a Secret named tailscale-oauth-secret
+  clientSecret: ""
+
+# Tailscale Operator configuration
+operatorConfig:
+  # Hostname for the operator pod on the tailnet
+  # This is the name the operator will announce to your Tailscale network
+  hostname: "k8s-operator"
+
+  # Default tags to apply to managed tailnet nodes
+  # Used when creating Tailscale resources without explicit tags
+  defaultTags:
+    - "tag:k8s"
+    # - "tag:production"  # Add your own tags as needed
+
+  # OPTIONAL: Set the tailnet name (e.g., "company.tailscale.net")
+  # If not set, operator will use the default tailnet for the OAuth credentials
+  # tailnet: "example.tailscale.net"
+
+# Operator Pod Configuration
+operatorDeploy:
+  # Number of operator replicas
+  replicas: 1
+
+  # Resource requests and limits
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "256Mi"
+      cpu: "500m"
+
+# Proxy pod defaults (applied when creating Tailscale proxies)
+proxies:
+  # Default resources for proxy pods
+  resources:
+    requests:
+      memory: "64Mi"
+      cpu: "50m"
+    limits:
+      memory: "128Mi"
+      cpu: "200m"
+
+  # Service type for proxy Services (ClusterIP, LoadBalancer, etc.)
+  # serviceType: "ClusterIP"
+
+  # Enable OIDC support (useful for protecting services with Tailscale device auth)
+  # oidc:
+  #   enabled: true
+
+# OPTIONAL: Enable debug logging
+# debug: "true"
+
+# RBAC configuration (usually enabled by default)
+rbac:
+  create: true
+
+# Service Account configuration
+serviceAccount:
+  create: true
+  name: "tailscale-operator"
+
+# Namespace where operator is deployed
+namespace: "tailscale"
+
+---
+# SETUP INSTRUCTIONS
+#
+# 1. Generate OAuth Token in Tailscale Admin Console:
+#    - Go to https://login.tailscale.com/admin/settings/oauth
+#    - Click "Generate OAuth token"
+#    - Select "All" or desired capabilities
+#    - Copy the Client ID and Client Secret
+#
+# 2. Update this file with your credentials:
+#    - Set oauth.clientId to your Client ID
+#    - Set oauth.clientSecret to your Client Secret
+#
+# 3. Deploy the operator:
+#    helm repo add tailscale https://pkgs.tailscale.com/helmcharts
+#    helm repo update
+#    helm install tailscale-operator tailscale/tailscale-operator \
+#      --namespace tailscale --create-namespace \
+#      -f bootstrap/tailscale-operator/values.yaml
+#
+# 4. Verify the operator is running:
+#    kubectl get pods -n tailscale
+#    kubectl logs -n tailscale -l app=tailscale-operator
+#
+# 5. Once running, you can create Tailscale proxy resources:
+#    - Proxies for specific Services
+#    - Subnet routes
+#    - Device registration
+#
+# SECURITY NOTES:
+# - Store this file in a secure location (not in a public repo)
+# - Consider using Sealed Secrets or External Secrets to manage oauth.clientSecret
+# - The OAuth secret will be stored in Kubernetes as a Secret object
+# - Restrict RBAC access to the tailscale-operator service account
+#
+# DOCUMENTATION:
+# - https://tailscale.com/kb/1236/kubernetes/
+# - https://github.com/tailscale/tailscale-operator

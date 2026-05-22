@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: phantom-site
+  namespace: phantom-site
+  labels:
+    app: phantom-site
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: phantom-site
+  template:
+    metadata:
+      labels:
+        app: phantom-site
+    spec:
+      # Run on cyberdeck (Pi with Tailscale Funnel enabled)
+      nodeSelector:
+        kubernetes.io/hostname: cyberdeck
+
+      containers:
+        - name: phantom-site
+          # TODO: Build and push nginx image serving phantomcybersolutions.com static content
+          # Dockerfile: Dockerfile.phantom-nginx
+          # Base: nginx:latest (supports linux/amd64 + linux/arm64)
+          # COPY from /home/roger/phantomcybersolutions.com/* to /usr/share/nginx/html/
+          image: ghcr.io/realphantomlee/phantom-site:latest
+          imagePullPolicy: Always
+
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+
+          env:
+            # TODO: configure environment variables if needed
+            # - name: NGINX_HOST
+            #   value: "phantomcybersolutions.com"
+
+          # Health check for nginx
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 2
+
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "500m"

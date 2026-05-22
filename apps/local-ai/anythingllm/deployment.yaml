@@ -1,0 +1,78 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: anythingllm
+  namespace: local-ai
+  labels:
+    app: anythingllm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: anythingllm
+  template:
+    metadata:
+      labels:
+        app: anythingllm
+    spec:
+      # Run on blacknode where storage PVC is provisioned via local-path
+      nodeSelector:
+        kubernetes.io/hostname: blacknode
+
+      containers:
+        - name: anythingllm
+          # TODO: update to match your deployed image tag
+          image: ghcr.io/realphantomlee/anythingllm:latest
+          imagePullPolicy: Always
+
+          ports:
+            - name: http
+              containerPort: 3001
+              protocol: TCP
+
+          env:
+            # Point to the manually-managed Ollama Endpoints service
+            - name: OLLAMA_BASE_PATH
+              value: "http://ollama-host:11434"
+
+            # TODO: set other AnythingLLM env vars as needed
+            # - name: LOG_LEVEL
+            #   value: "info"
+
+          # Mount storage volume for AnythingLLM state
+          volumeMounts:
+            - name: storage
+              mountPath: /app/server/storage
+
+          # Health check: AnythingLLM should have a readiness endpoint
+          # TODO: adjust path if AnythingLLM exposes different health endpoint
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: 3001
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: 3001
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "500m"
+            limits:
+              memory: "2Gi"
+              cpu: "2"
+
+      volumes:
+        - name: storage
+          persistentVolumeClaim:
+            claimName: anythingllm-storage

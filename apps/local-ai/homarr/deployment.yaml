@@ -1,0 +1,82 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: homarr
+  namespace: local-ai
+  labels:
+    app: homarr
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: homarr
+  template:
+    metadata:
+      labels:
+        app: homarr
+    spec:
+      # Run on blacknode where storage PVC is provisioned via local-path
+      nodeSelector:
+        kubernetes.io/hostname: blacknode
+
+      containers:
+        - name: homarr
+          # TODO: update to match your deployed image tag
+          image: ghcr.io/realphantomlee/homarr:latest
+          imagePullPolicy: Always
+
+          ports:
+            - name: http
+              containerPort: 7575
+              protocol: TCP
+
+          env:
+            # Homarr encryption key for secure settings storage.
+            # Created imperatively via: kubectl create secret generic homarr-secrets -n local-ai --from-literal=SECRET_ENCRYPTION_KEY=<64-char-hex-string>
+            # Then referenced here via secretKeyRef
+            - name: SECRET_ENCRYPTION_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: homarr-secrets
+                  key: SECRET_ENCRYPTION_KEY
+
+            # TODO: add other Homarr config env vars as needed
+            # - name: LOG_LEVEL
+            #   value: "info"
+
+          # Mount storage volume for Homarr appdata
+          volumeMounts:
+            - name: appdata
+              mountPath: /app/data/configs
+
+          # Health check
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 7575
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 7575
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "1Gi"
+              cpu: "1"
+
+      volumes:
+        - name: appdata
+          persistentVolumeClaim:
+            claimName: homarr-appdata

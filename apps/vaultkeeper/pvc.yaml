@@ -1,0 +1,38 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: vaultkeeper-data
+  namespace: vaultkeeper
+  labels:
+    app: vaultkeeper-server
+spec:
+  accessModes:
+    - ReadWriteOnce
+
+  # k3s includes local-path StorageClass by default.
+  # Provisioning happens on the node where pod is scheduled (aipi).
+  storageClassName: local-path
+
+  resources:
+    requests:
+      storage: 5Gi
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: vaultkeeper-backups
+  namespace: vaultkeeper
+  labels:
+    app: vaultkeeper-server
+spec:
+  accessModes:
+    - ReadWriteOnce
+
+  # k3s includes local-path StorageClass by default.
+  # Provisioning happens on the node where pod is scheduled (aipi).
+  storageClassName: local-path
+
+  resources:
+    requests:
+      storage: 10Gi

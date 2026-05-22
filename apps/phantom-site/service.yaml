@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: phantom-site
+  namespace: phantom-site
+  labels:
+    app: phantom-site
+  annotations:
+    # Tailscale Operator annotations for internet-facing exposure via Funnel.
+    # cyberdeck has funnel=enabled label, enabling Funnel for this service.
+    tailscale.com/hostname: "phantomcybersolutions"
+    # Enable Tailscale Funnel for public HTTPS access (requires cyberdeck Funnel enabled)
+    tailscale.com/funnel: "true"
+spec:
+  type: LoadBalancer
+  loadBalancerClass: tailscale
+
+  selector:
+    app: phantom-site
+
+  ports:
+    - port: 80
+      targetPort: http
+      protocol: TCP
+      name: http

@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: homarr
+  namespace: local-ai
+  labels:
+    app: homarr
+  annotations:
+    # Tailscale Operator annotations for secure exposure on tailnet
+    tailscale.com/hostname: "homarr"
+spec:
+  type: LoadBalancer
+  loadBalancerClass: tailscale
+
+  selector:
+    app: homarr
+
+  ports:
+    - port: 7575
+      targetPort: http
+      protocol: TCP
+      name: http
