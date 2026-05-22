@@ -6,7 +6,8 @@ metadata:
   labels:
     app: anythingllm
 spec:
-  replicas: 1
+  # DISABLED: Image ghcr.io/realphantomlee/anythingllm:latest does not exist. See audit cycle 1.
+  replicas: 0
   selector:
     matchLabels:
       app: anythingllm
