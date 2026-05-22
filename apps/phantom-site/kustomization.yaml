@@ -1,5 +1,7 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
+metadata:
+  name: phantom-site
 
 # Directory-relative references (assumes this file is in apps/phantom-site/)
 namespace: phantom-site

@@ -38,15 +38,15 @@ spec:
             # - name: PORT
             #   value: "8080"
 
-          # Mount storage volumes
+          # Mount storage volumes (must match Dockerfile paths)
           volumeMounts:
             # Primary data store (SQLite, configs, etc.)
             - name: data
-              mountPath: /app/data
+              mountPath: /opt/vaultkeeper/data
 
             # Backup directory (snapshots, exports, etc.)
             - name: backups
-              mountPath: /app/backups
+              mountPath: /opt/vaultkeeper/backups
 
           # Liveness probe: VaultKeeper should expose /health endpoint
           livenessProbe:
