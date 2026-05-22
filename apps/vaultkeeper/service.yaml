@@ -19,7 +19,7 @@ spec:
     app: vaultkeeper-server
 
   ports:
-    - port: 8080
+    - port: 3456
       targetPort: http
       protocol: TCP
       name: http
