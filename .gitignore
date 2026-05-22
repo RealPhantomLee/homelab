@@ -5,3 +5,18 @@ docker-data/
 *.secret
 kubeconfig
 *.kubeconfig
+
+# Keys & certs
+*.key
+*.pem
+
+# OS / editor artifacts
+.DS_Store
+*.swp
+*.swo
+*~
+
+# Temp / local overrides
+tmp/
+*.local.yaml
+*.local.yml
