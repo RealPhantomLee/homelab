@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: grafana
+  namespace: monitoring
+  labels:
+    app: grafana
+spec:
+  # ClusterIP for now. To expose on the tailnet, switch to:
+  #   type: LoadBalancer
+  #   loadBalancerClass: tailscale
+  # after the Tailscale Operator is fixed.
+  type: ClusterIP
+
+  selector:
+    app: grafana
+
+  ports:
+    - port: 3000
+      targetPort: http
+      protocol: TCP
+      name: http

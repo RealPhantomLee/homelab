@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: grafana-storage
+  namespace: monitoring
+  labels:
+    app: grafana
+spec:
+  accessModes:
+    - ReadWriteOnce
+
+  # k3s includes local-path StorageClass by default.
+  # Provisioning happens on the node where pod is scheduled (blacknode).
+  storageClassName: local-path
+
+  resources:
+    requests:
+      storage: 5Gi
