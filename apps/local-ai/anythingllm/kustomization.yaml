@@ -1,5 +1,7 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
+metadata:
+  name: anythingllm
 
 # Directory-relative references (assumes this file is in apps/local-ai/anythingllm/)
 namespace: local-ai
