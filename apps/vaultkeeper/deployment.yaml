@@ -28,7 +28,7 @@ spec:
 
           ports:
             - name: http
-              containerPort: 8080
+              containerPort: 3456
               protocol: TCP
 
           env:
