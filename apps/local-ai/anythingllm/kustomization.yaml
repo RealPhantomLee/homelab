@@ -7,9 +7,6 @@ metadata:
 namespace: local-ai
 
 resources:
-  - ../namespace.yaml
-  - ../ollama/endpoints.yaml
-  - ../ollama/service.yaml
   - deployment.yaml
   - pvc.yaml
   - service.yaml
