@@ -1,7 +1,18 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
+
+namespace: local-ai
+
 resources:
   - namespace.yaml
-  - anythingllm/kustomization.yaml
-  - homarr/kustomization.yaml
-  - ollama/
+  - anythingllm/deployment.yaml
+  - anythingllm/pvc.yaml
+  - anythingllm/service.yaml
+  - homarr/deployment.yaml
+  - homarr/pvc.yaml
+  - homarr/service.yaml
+  - ollama/endpoints.yaml
+  - ollama/service.yaml
+
+commonLabels:
+  managed-by: argocd
