@@ -1,0 +1,17 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+metadata:
+  name: headlamp
+
+# Headlamp runs in kube-system (system namespace)
+# Note: namespace field is not used since kube-system is a system namespace
+
+resources:
+  - deployment.yaml
+  - service.yaml
+  - rbac.yaml
+  - sa-secret.yaml
+
+commonLabels:
+  app: headlamp
+  managed-by: argocd

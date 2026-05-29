@@ -1,5 +1,7 @@
 .env
 *.env
+!example.env
+!*.example.env
 secrets/
 docker-data/
 *.secret
@@ -9,6 +11,8 @@ kubeconfig
 # Keys & certs
 *.key
 *.pem
+*-token.txt
+*-token.md
 
 # OS / editor artifacts
 .DS_Store

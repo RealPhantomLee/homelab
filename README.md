@@ -5,35 +5,35 @@
 [![Tailscale](https://img.shields.io/badge/Overlay-Tailscale-242424)](https://tailscale.com/)
 [![License](https://img.shields.io/badge/license-private-lightgrey)](#)
 
-A three-node k3s cluster running on a Tailscale overlay network. Hosts self-hosted AI tooling, an encrypted note-sync server, and a public-facing static site — all managed via ArgoCD app-of-apps GitOps.
+A four-node k3s cluster running on a Tailscale overlay network. Hosts self-hosted AI tooling, an encrypted note-sync server, a Kubernetes dashboard, and a public-facing static site — all managed via ArgoCD app-of-apps GitOps.
 
 ## Cluster Architecture
 
 ```
                           tailnet (100.x.x.x)
-                                 |
-        +------------------------+------------------------+
-        |                        |                        |
-   +----v-----+            +-----v-----+            +-----v------+
-   | blacknode|            |   aipi    |            | cyberdeck  |
-   |  x86_64  |            |  Pi 5 arm |            |  Pi arm    |
-   |  control |            |  worker   |            |  worker    |
-   |  plane   |            |           |            |  + Funnel  |
-   +----+-----+            +-----+-----+            +-----+------+
-        |                        |                        |
+                          /        |        \
+        +----+----+   +----+----+   +----+----+   +----+----+
+        |          |   |          |   |          |   |          |
+   +---------+  +---------+  +---------+  +---------+
+   |blacknode|  |  aipi   |  |  core   |  |cyberdeck|
+   | x86_64  |  | Pi 5 arm|  | x86_64  |  | Pi arm  |
+   | control |  | worker  |  | worker  |  | worker  |
+   | plane   |  |         |  |         |  | +Funnel |
+   +---------+  +---------+  +---------+  +---------+
+        |            |            |            |
         |  flannel-iface=tailscale0 — all pod traffic on tailnet
         |
-   +----v---------------+   +-----v-----------+   +----v-------------+
-   | ArgoCD             |   | vaultkeeper     |   | phantom-site     |
-   | Tailscale Operator |   | (encrypted sync)|   | (public via      |
-   | local-ai (AI UIs)  |   | local-path PVCs |   |  Funnel)         |
-   +--------------------+   +-----------------+   +------------------+
+   +---------+   +---------+   +---------+   +---------+
+   | ArgoCD  |   |vault    |   |headlamp |   |phantom  |
+   |local-ai |   |keeper   |   |dashboard|   |  site   |
+   +---------+   +---------+   +---------+   +---------+
 ```
 
 | Node      | Role          | Arch    | Tailscale IP   |
 |-----------|---------------|---------|----------------|
 | blacknode | control-plane | x86_64  | 100.90.234.21  |
 | aipi      | worker (Pi 5) | arm64   | 100.76.179.112 |
+| core      | worker        | x86_64  | 100.93.114.9   |
 | cyberdeck | worker (Pi)   | arm64   | 100.121.96.1   |
 
 Nodes communicate exclusively over Tailscale (`flannel-iface=tailscale0`). There is no LAN dependency — the cluster works wherever the nodes have tailnet connectivity.
@@ -66,6 +66,7 @@ apps/                       Kubernetes manifests per workload (Kustomize)
   phantom-site/             Static site served via Tailscale Funnel (cyberdeck)
   vaultkeeper/              Rust/Axum encrypted sync server (aipi)
   local-ai/                 AnythingLLM + Homarr + Ollama Endpoints (blacknode)
+  headlamp/                 Kubernetes dashboard with cluster-admin access (core)
   monitoring/               Placeholder for Prometheus/Grafana
 clusters/homelab/apps/      ArgoCD Application definitions (root-app + children)
 bootstrap/                  One-time cluster setup (Tailscale Operator Helm values)
@@ -82,6 +83,7 @@ CONTRIBUTING.md             How to add a new workload
 | phantom-site | phantom-site | cyberdeck | Tailscale Funnel (public HTTPS)       | Active      |
 | vaultkeeper  | vaultkeeper  | aipi      | ClusterIP (tailnet exposure optional) | Disabled\*  |
 | local-ai     | local-ai     | blacknode | Tailscale LoadBalancer (tailnet only) | Partial\*\* |
+| headlamp     | kube-system  | core      | NodePort 30080 (tailnet only)         | Active      |
 | monitoring   | monitoring   | (any)     | None yet                              | Placeholder |
 
 \* `vaultkeeper-server` has `replicas: 0` pending a multi-arch image rebuild for arm64.
