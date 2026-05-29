@@ -1,0 +1,29 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: phantom-ai
+  namespace: argocd
+spec:
+  project: default
+  # Repository configuration
+  source:
+    repoURL: https://github.com/realphantomlee/phantom-ai
+    targetRevision: main
+    path: k8s
+
+  # Deployment destination
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: phantom-ai
+
+  # Automated sync with self-healing
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+
+  # Enable cascading deletion
+  finalizers:
+    - resources-finalizer.argocd.io
